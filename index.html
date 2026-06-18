@@ -42,7 +42,6 @@
       50% { top: 100%; }
       100% { top: 0%; }
     }
-
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
     th { background: #f1f5f9; padding: 12px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); }
     td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
@@ -61,10 +60,23 @@
     .status-card-warning { background: #fef3c7; border-color: #fde68a; color: #92400e; }
     .status-card-danger { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
     .status-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; background: rgba(255,255,255,0.4); }
+    
+    @media (max-width: 480px) {
+      body { padding: 15px 10px; }
+      .container { padding: 0; }
+      .card { padding: 16px; margin-bottom: 16px; }
+      .header { margin-bottom: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+      .header h1 { font-size: 20px; }
+      .header p { font-size: 12px; }
+      #scanner-container { max-width: 320px; border-radius: 12px; }
+      .scanner-target { border: 20px solid rgba(0,0,0,0.4); }
+      .scanner-box { width: 160px; height: 160px; }
+      .status-card { padding: 12px; gap: 10px; }
+      .status-icon { width: 32px; height: 32px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
-
   <div id="dashboardPage" class="container">
     <div class="header">
       <div>
@@ -75,7 +87,6 @@
         <i class="fas fa-cog"></i> Link API
       </button>
     </div>
-
     <div class="card" style="text-align: center;">
       <div class="card-title" style="justify-content: center;">
         <i class="fas fa-camera" style="color: var(--primary);"></i>
@@ -104,7 +115,6 @@
         </p>
       </div>
     </div>
-
     <!-- SCAN STATUS DISPLAY CARD -->
     <div id="statusCard" class="status-card">
       <div class="status-icon" id="statusCardIcon"></div>
@@ -113,10 +123,7 @@
         <p style="font-size: 13px; opacity: 0.9;" id="statusCardMessage"></p>
       </div>
     </div>
-
-
   </div>
-
   <!-- Reusable Custom Alert Modal -->
   <div id="appModal" class="modal">
     <div class="modal-content">
@@ -126,7 +133,6 @@
       <div id="appModalButtons" style="display: flex; gap: 12px; justify-content: center;"></div>
     </div>
   </div>
-
   <!-- Settings Modal for Web App URL -->
   <div id="settingsModal" class="modal">
     <div class="modal-content" style="text-align: left; max-width: 480px;">
@@ -146,27 +152,23 @@
       </div>
     </div>
   </div>
-
   <script>
     var html5QrCode = null;
     var isScanning = false;
     var lastScannedCode = "";
     var scanLock = false;
-
     function showAppAlert(title, message, callback) {
       var modal = document.getElementById("appModal");
       var titleEl = document.getElementById("appModalTitle");
       var msgEl = document.getElementById("appModalMessage");
       var iconEl = document.getElementById("appModalIcon");
       var buttonsEl = document.getElementById("appModalButtons");
-
       titleEl.innerText = title;
       msgEl.innerText = message;
       
       iconEl.style.background = "#FEF3C7"; // Amber
       iconEl.style.color = "#D97706";
       iconEl.innerHTML = "⚠️"; 
-
       buttonsEl.innerHTML = "";
       var btn = document.createElement("button");
       btn.className = "btn";
@@ -182,7 +184,6 @@
       
       modal.style.setProperty("display", "flex", "important");
     }
-
     window.addEventListener('DOMContentLoaded', function() {
       requestCameraPermissionAndStart();
       
@@ -193,7 +194,6 @@
         }, 800);
       }
     });
-
     function requestCameraPermissionAndStart() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         activateNativeCameraFallback();
@@ -211,19 +211,16 @@
           activateNativeCameraFallback();
         });
     }
-
     function openSettingsModal() {
       var modal = document.getElementById("settingsModal");
       var input = document.getElementById("webAppUrlInput");
       input.value = localStorage.getItem('bookingWebAppUrl') || "";
       modal.style.setProperty("display", "flex", "important");
     }
-
     function closeSettingsModal() {
       var modal = document.getElementById("settingsModal");
       modal.style.setProperty("display", "none", "important");
     }
-
     function saveSettingsConfig() {
       var url = document.getElementById("webAppUrlInput").value.trim();
       if (url && !url.startsWith("https://script.google.com/")) {
@@ -234,7 +231,6 @@
       closeSettingsModal();
       showAppAlert("Settings Saved", "Connection URL linked successfully.");
     }
-
     function startCameraScanner() {
       if (html5QrCode === null) {
         html5QrCode = new Html5Qrcode("reader");
@@ -245,7 +241,6 @@
       var toggleBtn = document.getElementById("cameraToggleBtn");
       toggleBtn.innerHTML = '<i class="fas fa-video-slash"></i> Stop Camera';
       toggleBtn.className = "btn btn-secondary";
-
       const config = { fps: 10, qrbox: { width: 220, height: 220 } };
       html5QrCode.start(
         { facingMode: "environment" }, 
@@ -257,7 +252,6 @@
         activateNativeCameraFallback();
       });
     }
-
     function stopCameraScanner() {
       document.getElementById("scannerTargetOverlay").style.display = "none";
       isScanning = false;
@@ -266,14 +260,12 @@
         toggleBtn.innerHTML = '<i class="fas fa-video"></i> Start Camera';
         toggleBtn.className = "btn";
       }
-
       if (html5QrCode && html5QrCode.isScanning) {
         html5QrCode.stop().catch(function(err) {
           console.error("Error stopping scanner: ", err);
         });
       }
     }
-
     function toggleScannerState() {
       if (isScanning) {
         stopCameraScanner();
@@ -281,18 +273,15 @@
         requestCameraPermissionAndStart();
       }
     }
-
     function activateNativeCameraFallback() {
       document.getElementById("fallback-container").style.display = "block";
       document.getElementById("scannerTargetOverlay").style.display = "none";
       document.getElementById("cameraToggleBtn").style.display = "none";
       isScanning = false;
     }
-
     function triggerNativeCamera() {
       document.getElementById("cameraFileInput").click();
     }
-
     function handleFallbackFileSelection(inputEl) {
       if (!inputEl.files || inputEl.files.length === 0) return;
       
@@ -313,7 +302,6 @@
           console.error("File scan error: ", err);
         });
     }
-
     function onQrScanSuccess(decodedText, decodedResult) {
       if (scanLock) return;
       if (decodedText === lastScannedCode) return; // Ignore continuous scan of same code
@@ -323,11 +311,9 @@
       
       processCheckIn(decodedText);
     }
-
     function onQrScanError(errorMessage) {
       // Quietly ignore camera scanning noise errors
     }
-
     function playSuccessBeep() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -345,17 +331,14 @@
         console.warn("Audio Context blocked or failed: ", e);
       }
     }
-
     function showStatusCard(type, title, message) {
       var card = document.getElementById("statusCard");
       var icon = document.getElementById("statusCardIcon");
       var titleEl = document.getElementById("statusCardTitle");
       var msgEl = document.getElementById("statusCardMessage");
-
       card.className = "status-card active";
       titleEl.innerText = title;
       msgEl.innerText = message;
-
       if (type === "success") {
         card.classList.add("status-card-success");
         icon.innerHTML = '<i class="fas fa-check"></i>';
@@ -367,7 +350,6 @@
         icon.innerHTML = '<i class="fas fa-times"></i>';
       }
     }
-
     function processCheckIn(bookingCode) {
       var webAppUrl = localStorage.getItem('bookingWebAppUrl') || "";
       if (!webAppUrl) {
@@ -376,10 +358,8 @@
         lastScannedCode = "";
         return;
       }
-
       // Ensure URL ends correctly
       var url = webAppUrl + "?action=checkIn&bookingCode=" + encodeURIComponent(bookingCode);
-
       fetch(url)
         .then(function(response) { return response.json(); })
         .then(function(res) {
