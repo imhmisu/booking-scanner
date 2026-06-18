@@ -2,201 +2,161 @@
 <html>
 <head>
   <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Book Your Appointment</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     :root {
-      --primary: #4F46E5; --primary-hover: #4338CA;
-      --bg: #F8FAFC; --surface: #FFFFFF; --text: #0F172A;
-      --text-soft: #64748B; --border: #E2E8F0; --danger: #EF4444;
-      --success: #10B981; --disabled: #CBD5E1; --radius: 16px;
-      --shadow: 0 20px 25px -5px rgba(0,0,0,0.03), 0 10px 10px -5px rgba(0,0,0,0.02);
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--background); color: var(--text); padding: 30px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+    .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; text-decoration: none; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--text-muted); }
+    .btn-secondary:hover { background: #475569; }
+    .card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+    .form-group { margin-bottom: 16px; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
+    .form-control:focus { border-color: var(--primary); }
     
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; padding: 40px 20px; }
-    .wrapper { max-width: 650px; width: 100%; margin: auto; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; padding: 40px; }
+    #scanner-container { width: 100%; max-width: 450px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 2px solid var(--border); position: relative; background: #000; aspect-ratio: 1; }
+    .scanner-target { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; border: 40px solid rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; }
+    .scanner-box { width: 220px; height: 220px; border: 2px solid var(--primary); border-radius: 8px; position: relative; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
+    .scanner-laser { position: absolute; width: 100%; height: 3px; background: var(--primary); left: 0; top: 0; animation: laser 2s infinite linear; }
     
-    .announcement { background: #EEF2FF; border-left: 4px solid var(--primary); padding: 15px 20px; border-radius: 8px; margin-bottom: 30px; font-size: 14px; color: #3730A3; font-weight: 500; display: flex; align-items: flex-start; gap: 12px; }
+    @keyframes laser {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    th { background: #f1f5f9; padding: 12px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    .badge { display: inline-flex; padding: 4px 8px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
     
-    h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; color: #0f172a; }
-    .subtitle { color: var(--text-soft); font-size: 14px; margin-bottom: 30px; font-weight: 400; }
+    .login-container { max-width: 400px; margin: 100px auto; text-align: center; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+    .modal-content { background: var(--surface); border-radius: 20px; max-width: 400px; width: 100%; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); position: relative; border: 1px solid var(--border); text-align: center; }
     
-    .form-group { margin-bottom: 24px; position: relative; }
-    .name-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 24px; }
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #334155; }
-    input[type="text"], input[type="email"], input[type="number"], input[type="tel"], input[type="date"], select { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; color: var(--text); background-color: white; outline: none; transition: all 0.2s; }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08); }
-    input:disabled { background-color: #f8fafc; color: #64748b; cursor: not-allowed; border-color: var(--border); }
+    .status-card { display: none; border-radius: 12px; padding: 16px; margin-bottom: 20px; align-items: center; gap: 14px; border: 1px solid transparent; }
+    .status-card.active { display: flex; }
+    .status-card-success { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+    .status-card-warning { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+    .status-card-danger { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .status-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; background: rgba(255,255,255,0.4); }
     
-    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 8px; }
-    .slot-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.2s; background: white; position: relative; display: flex; flex-direction: column; justify-content: center; min-height: 70px; }
-    .slot-card:hover:not(.full):not(.disabled) { border-color: var(--primary); background: #FAF5FF; }
-    .slot-card.selected { border-color: var(--primary); background: #EEF2FF; box-shadow: 0 0 0 2px var(--primary); }
-    .slot-card.full { background: #F8FAFC; border-color: var(--border); cursor: not-allowed; opacity: 0.6; }
-    .slot-card.disabled { background: #F8FAFC; border-color: var(--border); cursor: not-allowed; opacity: 0.5; }
-    
-    .slot-time { font-size: 13px; font-weight: 600; color: var(--text); }
-    .slot-status { font-size: 11px; color: var(--text-soft); margin-top: 4px; font-weight: 500; }
-    .slot-card.selected .slot-time { color: var(--primary); }
-    .slot-card.full .slot-status { color: var(--danger); font-weight: 600; }
-    
-    .btn { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.15); }
-    .btn:hover:not(:disabled) { background: var(--primary-hover); }
-    .btn:disabled { background: var(--disabled); cursor: not-allowed; box-shadow: none; }
-    
-    .footer { text-align: center; margin-top: 30px; font-size: 13px; color: var(--text-soft); }
-    .footer a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
-    .footer a:hover { text-decoration: underline; }
-    
-    /* Elegant Modal Display Transitions Styling */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
-    .modal-content { background: var(--surface); border-radius: 20px; max-width: 460px; width: 100%; padding: 35px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); position: relative; border: 1px solid var(--border); text-align: center; }
-    .modal-close { position: absolute; top: 20px; right: 20px; font-size: 16px; color: var(--text-soft); cursor: pointer; background: #F1F5F9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-    .modal-close:hover { background: #E2E8F0; color: var(--text); }
-    
-    .success-icon-wrapper { width: 64px; height: 64px; background: #DCFCE7; color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 24px; font-weight: bold; }
-    .error-msg { background: #FEE2E2; color: #991B1B; padding: 14px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 20px; display: none; border: 1px solid #FCA5A5; text-align: left; }
-    
-    .info-box { background: #F8FAFC; border: 1px solid var(--border); padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; text-align: left; }
-    .info-box div { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 10px; }
-    .info-box div:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
-    .info-label { color: var(--text-soft); font-weight: 500; }
-    .info-value { color: var(--text); font-weight: 600; }
-    
-    .btn-outline-danger { background: white; color: var(--danger); border: 1px solid var(--danger); box-shadow: none; }
-    .btn-outline-danger:hover:not(:disabled) { background: #FEF2F2; }
-    .btn-secondary { background: #64748B; color: white; box-shadow: none; }
-    .btn-secondary:hover:not(:disabled) { background: #475569; }
-    .btn-danger { background: var(--danger); color: white; box-shadow: none; }
-    .btn-danger:hover:not(:disabled) { background: #dc2626; }
+    @media (max-width: 480px) {
+      body { padding: 15px 10px; }
+      .container { padding: 0; }
+      .card { padding: 16px; margin-bottom: 16px; }
+      .header { margin-bottom: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+      .header h1 { font-size: 20px; }
+      .header p { font-size: 12px; }
+      #scanner-container { max-width: 320px; border-radius: 12px; }
+      .scanner-target { border: 20px solid rgba(0,0,0,0.4); }
+      .scanner-box { width: 160px; height: 160px; }
+      .status-card { padding: 12px; gap: 10px; }
+      .status-icon { width: 32px; height: 32px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div id="announcement-banner" class="announcement" style="display:none;">
-      <span style="font-size:16px;">📢</span>
-      <span id="announcement-text"></span>
+  <div id="dashboardPage" class="container">
+    <div class="header">
+      <div>
+        <h1>QR Check-In Scanner</h1>
+        <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Hold a student's check-in QR code in front of the camera to tag attendance.</p>
+      </div>
+      <button class="btn btn-secondary" onclick="openSettingsModal()" style="padding: 10px 14px; margin-left: 10px;">
+        <i class="fas fa-cog"></i> Link API
+      </button>
     </div>
-    <h2>Book Appointment Schedule</h2>
-    <p class="subtitle">Provide registration parameters below to establish your allocation tracking node profile.</p>
-    
-    <div id="booking-form-container">
-      <form id="appointmentForm" onsubmit="handleFormSubmissionEvent(event)">
-        
-        <div class="name-grid">
-          <div>
-            <label for="firstName">First Name *</label>
-            <input type="text" id="firstName" required placeholder="First Name">
-          </div>
-          <div>
-            <label for="middleName">Middle Name</label>
-            <input type="text" id="middleName" placeholder="Optional">
-          </div>
-          <div>
-            <label for="lastName">Last Name / Surname *</label>
-            <input type="text" id="lastName" required placeholder="Last Name">
+    <div class="card" style="text-align: center;">
+      <div class="card-title" style="justify-content: center;">
+        <i class="fas fa-camera" style="color: var(--primary);"></i>
+        <span>Live Camera Viewfinder</span>
+      </div>
+      <div id="scanner-container">
+        <div id="reader" style="width: 100%; height: 100%;"></div>
+        <div class="scanner-target" id="scannerTargetOverlay">
+          <div class="scanner-box">
+            <div class="scanner-laser"></div>
           </div>
         </div>
-        
-        <div class="form-group">
-          <label for="email">Email Communication Node</label>
-          <input type="email" id="email" required placeholder="name@domain.com">
-        </div>
-        
-        <!-- Dynamic system question targets -->
-        <div id="dynamic-fields-area"></div>
-        
-        <div class="form-group">
-          <label for="date">Select Calendar Target Day</label>
-          <input type="date" id="date" required onchange="handleTargetDaySlotsReload()">
-        </div>
-        
-        <div class="form-group" id="slots-section" style="display:none;">
-          <label>Available Structural Operational Grid Allocation Blocks</label>
-          <div id="slots-grid-container" class="slot-grid"></div>
-          <input type="hidden" id="selectedTimeSlot" required>
-        </div>
-        
-        <button type="submit" id="submitBtn" class="btn" disabled>Confirm Booking Matrix</button>
-      </form>
+      </div>
+      <button class="btn btn-secondary" id="cameraToggleBtn" style="margin-top: 16px;" onclick="toggleScannerState()">
+        <i class="fas fa-video-slash"></i> Stop Camera
+      </button>
+      
+      <!-- Native Camera Fallback UI -->
+      <div id="fallback-container" style="display:none; margin-top: 16px;">
+        <button class="btn" style="background:#059669; justify-content: center; display: inline-flex; margin-top: 0; width: auto;" onclick="triggerNativeCamera()">
+          <i class="fas fa-camera"></i> Take Photo to Scan
+        </button>
+        <input type="file" id="cameraFileInput" accept="image/*" capture="camera" style="display: none;" onchange="handleFallbackFileSelection(this)">
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px; padding: 0 10px;">
+          Using native camera app fallback because live video stream is blocked by browser iframe sandboxing.
+        </p>
+      </div>
     </div>
-    
-    <!-- Closed Message View -->
-    <div id="closed-message-container" style="display:none; text-align: center; padding: 40px 20px;">
-      <span style="font-size: 48px; margin-bottom: 20px; display: block;">🔒</span>
-      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #ef4444;">Booking is Closed</h3>
-      <p id="closed-announcement-text" style="color: var(--text-soft); font-size: 14px; line-height: 1.6;"></p>
-    </div>
-    
-    <div class="footer">
-      Already hold a reservation schedule code? <a onclick="toggleManagementModal(true)">Manage Existing Booking Profile</a>
+    <!-- SCAN STATUS DISPLAY CARD -->
+    <div id="statusCard" class="status-card">
+      <div class="status-icon" id="statusCardIcon"></div>
+      <div style="text-align: left;">
+        <h4 style="font-size: 15px; font-weight: 700;" id="statusCardTitle"></h4>
+        <p style="font-size: 13px; opacity: 0.9; white-space: pre-line; line-height: 1.4;" id="statusCardMessage"></p>
+      </div>
     </div>
   </div>
-  <!-- STABLE HIGH-PRECISION RE-INDEXED POPUP BACKDROP LAYER -->
-  <div id="statusModal" class="modal">
+  <!-- Reusable Custom Alert Modal -->
+  <div id="appModal" class="modal">
     <div class="modal-content">
-      <div class="success-icon-wrapper">✓</div>
-      <h3 style="font-size: 22px; margin-bottom: 8px; font-weight: 700; color: #0f172a;">Booking Confirmed</h3>
-      <p style="color: var(--text-soft); font-size: 14px; margin-bottom: 24px; padding: 0 10px;">Your appointment parameters have been synchronized with the database engine.</p>
-      
-      <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-        <span style="font-size: 11px; font-weight: 700; color: var(--text-soft); display: block; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Reservation Tracking Key</span>
-        <div style="font-size: 24px; font-weight: 700; color: var(--primary); letter-spacing: 1px; font-family: monospace;" id="receiptCodeDisplay"></div>
-      </div>
-      
-      <p style="font-size: 13px; color: var(--text-soft); line-height: 1.6; margin-bottom: 24px; padding: 0 15px;">A comprehensive validation record layout document featuring your name, profile, and computed age parameters has been compiled and forwarded to your chosen inbox.</p>
-      <button class="btn" style="box-shadow: none; width: 100%;" onclick="closeStatusFeedbackModal()">Dismiss Overview</button>
+      <div id="appModalIcon" style="width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;"></div>
+      <h3 id="appModalTitle" style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text);"></h3>
+      <p id="appModalMessage" style="font-size: 14px; color: var(--text-soft); line-height: 1.5; margin-bottom: 24px;"></p>
+      <div id="appModalButtons" style="display: flex; gap: 12px; justify-content: center;"></div>
     </div>
   </div>
-  <!-- SELF SERVICE CONTROL PANEL -->
-  <div id="managementModal" class="modal">
-    <div class="modal-content" style="text-align: left;">
-      <button class="modal-close" onclick="toggleManagementModal(false)">✕</button>
-      <h3 style="font-size: 20px; margin-bottom: 6px; font-weight: 700; text-align: center;">Self Service Hub</h3>
-      <p style="color: var(--text-soft); font-size: 13px; margin-bottom: 24px; text-align: center;">Review or shift current appointment configuration coordinates.</p>
+  <!-- Settings Modal for Web App URL -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content" style="text-align: left; max-width: 480px;">
+      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--text); text-align: center;">Connection Settings</h3>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; text-align: center;">
+        Since browser security policy blocks camera streams inside Google's sandboxed iframes, please host this scanner externally or run it as a local HTML file and paste your Web App URL below.
+      </p>
       
-      <div id="manage-error" class="error-msg"></div>
-      
-      <div id="search-sub-panel">
-        <div class="form-group" style="margin-bottom: 20px;">
-          <label for="searchCode">Enter Booking Token Reference</label>
-          <input type="text" id="searchCode" placeholder="BK-100200" style="text-transform: uppercase;">
-        </div>
-        <button class="btn" id="findBtn" onclick="executeTokenProfileLookup()">Query Record Trace</button>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label for="webAppUrlInput" style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; display: block;">Google Apps Script Web App URL</label>
+        <input type="text" id="webAppUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec" style="font-size: 13px;">
       </div>
       
-      <div id="profile-display-panel" style="display: none;">
-        <div class="info-box">
-          <div><span class="info-label">Client Name:</span><span class="info-value" id="lbl-name"></span></div>
-          <div><span class="info-label">Target Day:</span><span class="info-value" id="lbl-date"></span></div>
-          <div><span class="info-label">Time Frame:</span><span class="info-value" id="lbl-time"></span></div>
-          <div><span class="info-label">Status Metric:</span><span class="info-value" id="lbl-status"></span></div>
-          <div><span class="info-label">Checked In:</span><span class="info-value" id="lbl-attended"></span></div>
-        </div>
-        
-        <div id="coordinate-shifting-panel" style="display: none; margin-bottom: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
-          <div class="form-group" style="margin-bottom: 16px;">
-            <label for="manage-new-date">Select Alternate Day</label>
-            <input type="date" id="manage-new-date" onchange="handleManagementShiftDaysReload()">
-          </div>
-          <div class="form-group" id="manage-slots-section" style="display: none; margin-bottom: 0;">
-            <label style="margin-bottom: 8px;">Select New Time Coordinates</label>
-            <div id="manage-slots-grid-container" class="slot-grid"></div>
-            <input type="hidden" id="selectedManageTimeSlot">
-          </div>
-        </div>
-        <div style="display: flex; gap: 12px; margin-top: 10px;" id="action-buttons-row">
-          <button class="btn btn-outline-danger" id="cancelActionBtn" style="flex:1" onclick="executeCancellationPipeline()">Cancel Booking</button>
-          <button class="btn" id="rescheduleActionBtn" style="flex:1; box-shadow: none;" onclick="executeReschedulingPipeline()">Reschedule</button>
-        </div>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn btn-secondary" style="flex: 1; margin-top: 0; justify-content: center;" onclick="closeSettingsModal()">Cancel</button>
+        <button class="btn" style="flex: 1; margin-top: 0; justify-content: center;" onclick="saveSettingsConfig()">Save Link</button>
       </div>
     </div>
   </div>
   <script>
-    var globalRegistrationFieldsLayout = [];
-    var activeTargetTokenRecord = null;
+    var html5QrCode = null;
+    var isScanning = false;
+    var lastScannedCode = "";
+    var scanLock = false;
     function showAppAlert(title, message, callback) {
       var modal = document.getElementById("appModal");
       var titleEl = document.getElementById("appModalTitle");
@@ -224,7 +184,157 @@
       
       modal.style.setProperty("display", "flex", "important");
     }
-    function showAppConfirm(title, message, onConfirm, onCancel) {
+    window.addEventListener('DOMContentLoaded', function() {
+      requestCameraPermissionAndStart();
+      
+      var webAppUrl = localStorage.getItem('bookingWebAppUrl');
+      if (!webAppUrl) {
+        setTimeout(function() {
+          openSettingsModal();
+        }, 800);
+      }
+    });
+    function requestCameraPermissionAndStart() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        activateNativeCameraFallback();
+        return;
+      }
+      
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          // Stop stream tracks immediately to release the device for html5-qrcode
+          stream.getTracks().forEach(function(track) { track.stop(); });
+          startCameraScanner();
+        })
+        .catch(function(err) {
+          console.warn("CORS/Sandbox blocked live getUserMedia. Falling back to native capture.", err);
+          activateNativeCameraFallback();
+        });
+    }
+    function openSettingsModal() {
+      var modal = document.getElementById("settingsModal");
+      var input = document.getElementById("webAppUrlInput");
+      input.value = localStorage.getItem('bookingWebAppUrl') || "";
+      modal.style.setProperty("display", "flex", "important");
+    }
+    function closeSettingsModal() {
+      var modal = document.getElementById("settingsModal");
+      modal.style.setProperty("display", "none", "important");
+    }
+    function saveSettingsConfig() {
+      var url = document.getElementById("webAppUrlInput").value.trim();
+      if (url && !url.startsWith("https://script.google.com/")) {
+        alert("Please enter a valid Google Apps Script Web App URL (starts with https://script.google.com/)");
+        return;
+      }
+      localStorage.setItem('bookingWebAppUrl', url);
+      closeSettingsModal();
+      showAppAlert("Settings Saved", "Connection URL linked successfully.");
+    }
+    function startCameraScanner() {
+      if (html5QrCode === null) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      
+      document.getElementById("scannerTargetOverlay").style.display = "flex";
+      isScanning = true;
+      var toggleBtn = document.getElementById("cameraToggleBtn");
+      toggleBtn.innerHTML = '<i class="fas fa-video-slash"></i> Stop Camera';
+      toggleBtn.className = "btn btn-secondary";
+      const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        config,
+        onQrScanSuccess,
+        onQrScanError
+      ).catch(function(err) {
+        console.warn("Camera start failed, triggering fallback UI.", err);
+        activateNativeCameraFallback();
+      });
+    }
+    function stopCameraScanner() {
+      document.getElementById("scannerTargetOverlay").style.display = "none";
+      isScanning = false;
+      var toggleBtn = document.getElementById("cameraToggleBtn");
+      if (toggleBtn) {
+        toggleBtn.innerHTML = '<i class="fas fa-video"></i> Start Camera';
+        toggleBtn.className = "btn";
+      }
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(function(err) {
+          console.error("Error stopping scanner: ", err);
+        });
+      }
+    }
+    function toggleScannerState() {
+      if (isScanning) {
+        stopCameraScanner();
+      } else {
+        requestCameraPermissionAndStart();
+      }
+    }
+    function activateNativeCameraFallback() {
+      document.getElementById("fallback-container").style.display = "block";
+      document.getElementById("scannerTargetOverlay").style.display = "none";
+      document.getElementById("cameraToggleBtn").style.display = "none";
+      isScanning = false;
+    }
+    function triggerNativeCamera() {
+      document.getElementById("cameraFileInput").click();
+    }
+    function handleFallbackFileSelection(inputEl) {
+      if (!inputEl.files || inputEl.files.length === 0) return;
+      
+      var file = inputEl.files[0];
+      showStatusCard("warning", "Scanning Photo...", "Analyzing the captured image QR code...");
+      
+      if (html5QrCode === null) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      
+      html5QrCode.scanFile(file, true)
+        .then(function(decodedText) {
+          document.getElementById("statusCard").classList.remove("active");
+          processCheckIn(decodedText);
+        })
+        .catch(function(err) {
+          showStatusCard("danger", "Scan Failed", "Could not read QR code. Make sure the QR code is clear, close, and in focus.");
+          console.error("File scan error: ", err);
+        });
+    }
+    function onQrScanSuccess(decodedText, decodedResult) {
+      if (scanLock) return;
+      if (decodedText === lastScannedCode) return; // Ignore continuous scan of same code
+      
+      scanLock = true;
+      lastScannedCode = decodedText;
+      
+      processCheckIn(decodedText);
+    }
+    function onQrScanError(errorMessage) {
+      // Quietly ignore camera scanning noise errors
+    }
+    function playSuccessBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (e) {
+        console.warn("Audio Context blocked or failed: ", e);
+      }
+    }
+    var autoCloseTimeout = null;
+    function showScanResultPopup(type, title, message) {
+      if (autoCloseTimeout) clearTimeout(autoCloseTimeout);
+      
       var modal = document.getElementById("appModal");
       var titleEl = document.getElementById("appModalTitle");
       var msgEl = document.getElementById("appModalMessage");
@@ -232,408 +342,117 @@
       var buttonsEl = document.getElementById("appModalButtons");
       titleEl.innerText = title;
       msgEl.innerText = message;
-      
-      iconEl.style.background = "#FEE2E2"; // Red
-      iconEl.style.color = "#DC2626";
-      iconEl.innerHTML = "❓";
-      buttonsEl.innerHTML = "";
-      
-      var cancelBtn = document.createElement("button");
-      cancelBtn.className = "btn btn-secondary";
-      cancelBtn.style.marginTop = "0";
-      cancelBtn.style.flex = "1";
-      cancelBtn.style.justifyContent = "center";
-      cancelBtn.innerText = "Cancel";
-      cancelBtn.onclick = function() {
-        modal.style.setProperty("display", "none", "important");
-        if (onCancel) onCancel();
-      };
-      
-      var confirmBtn = document.createElement("button");
-      confirmBtn.className = "btn btn-danger";
-      confirmBtn.style.marginTop = "0";
-      confirmBtn.style.flex = "1";
-      confirmBtn.style.justifyContent = "center";
-      confirmBtn.innerText = "Confirm";
-      confirmBtn.onclick = function() {
-        modal.style.setProperty("display", "none", "important");
-        if (onConfirm) onConfirm();
-      };
-      buttonsEl.appendChild(cancelBtn);
-      buttonsEl.appendChild(confirmBtn);
-      
-      modal.style.setProperty("display", "flex", "important");
-    }
-    window.addEventListener('DOMContentLoaded', () => {
-      google.script.run.withSuccessHandler(initializeHubLayoutConfigurationProperties).getInitialData();
-    });
-    function configureCalendarSystemDateWindowsRestrictions(openDaysCount) {
-      const openDays = parseInt(openDaysCount, 10) || 2;
-      const today = new Date();
-      const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-      const maxDate = new Date(today); maxDate.setDate(today.getDate() + openDays);
-      
-      const formatLocalDate = (d) => {
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-      
-      const tomorrowString = formatLocalDate(tomorrow);
-      const maxDateString = formatLocalDate(maxDate);
-      
-      const dateEl = document.getElementById('date');
-      dateEl.min = tomorrowString;
-      dateEl.max = maxDateString;
-      const manageDateEl = document.getElementById('manage-new-date');
-      manageDateEl.min = tomorrowString;
-      manageDateEl.max = maxDateString;
-    }
-    function initializeHubLayoutConfigurationProperties(payload) {
-      if (payload.settings.SystemStatus === "Closed") {
-        document.getElementById('booking-form-container').style.display = 'none';
-        document.getElementById('closed-message-container').style.display = 'block';
-        document.getElementById('closed-announcement-text').textContent = payload.settings.AnnouncementText || "Booking is currently closed. Please check back later.";
+      if (type === "success") {
+        iconEl.style.background = "#d1fae5";
+        iconEl.style.color = "#059669";
+        iconEl.innerHTML = "✓";
+      } else if (type === "warning") {
+        iconEl.style.background = "#fef3c7";
+        iconEl.style.color = "#d97706";
+        iconEl.innerHTML = "⚠️";
       } else {
-        document.getElementById('booking-form-container').style.display = 'block';
-        document.getElementById('closed-message-container').style.display = 'none';
+        iconEl.style.background = "#fee2e2";
+        iconEl.style.color = "#dc2626";
+        iconEl.innerHTML = "✕";
       }
-      if(payload.settings.AnnouncementText) {
-        document.getElementById('announcement-text').textContent = payload.settings.AnnouncementText;
-        document.getElementById('announcement-banner').style.display = 'flex';
-      }
+      buttonsEl.innerHTML = "";
+      var btn = document.createElement("button");
+      btn.className = "btn";
+      btn.style.marginTop = "0";
+      btn.style.width = "100%";
+      btn.style.justifyContent = "center";
+      btn.innerText = "OK";
       
-      configureCalendarSystemDateWindowsRestrictions(payload.settings.OpenDaysCount);
-      
-      globalRegistrationFieldsLayout = payload.fields || [];
-      const dynamicArea = document.getElementById('dynamic-fields-area');
-      dynamicArea.innerHTML = '';
-      
-      globalRegistrationFieldsLayout.forEach(f => {
-        const div = document.createElement('div');
-        div.className = 'form-group';
-        
-        const reqAttr = f.required ? 'required' : '';
-        const star = f.required ? ' *' : '';
-        
-        if (f.type === 'date' && (f.label.toLowerCase().includes('birth') || f.label.toLowerCase().includes('born'))) {
-          const today = new Date();
-          const todayString = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-          div.innerHTML = `<label for="${f.id}">${f.label}${star}</label>` +
-                          `<input type="date" id="${f.id}" ${reqAttr} max="${todayString}" onchange="calculateAgeFromInputNode(this.value, '${f.id}_age')">` +
-                          `<div style="margin-top:10px;"><label style="font-size:12px; color:var(--text-soft); margin-bottom:4px;">Computed System Age</label>` +
-                          `<input type="text" id="${f.id}_age" class="calculated-age-field" disabled placeholder="Select birthday above" style="padding:8px 14px; font-size:13px;"></div>`;
-        } else {
-          div.innerHTML = `<label for="${f.id}">${f.label}${star}</label>` +
-                          `<input type="${f.type}" id="${f.id}" ${reqAttr} placeholder="Provide dynamic context input">`;
-        }
-        dynamicArea.appendChild(div);
-      });
-    }
-    function calculateAgeFromInputNode(dobString, targetAgeInputId) {
-      const ageInput = document.getElementById(targetAgeInputId);
-      if (!dobString) { ageInput.value = ""; return; }
-      
-      const birthDate = new Date(dobString);
-      const today = new Date();
-      if (isNaN(birthDate.getTime())) { ageInput.value = ""; return; }
-      
-      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-      const monthDifference = today.getMonth() - birthDate.getMonth();
-      
-      if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-        calculatedAge--;
-      }
-      
-      ageInput.value = calculatedAge >= 0 ? calculatedAge + " Years Old" : "0 Years Old";
-    }
-    function handleTargetDaySlotsReload() {
-      const selectedDate = document.getElementById('date').value;
-      const gridContainer = document.getElementById('slots-grid-container');
-      const slotsSection = document.getElementById('slots-section');
-      const submitBtn = document.getElementById('submitBtn');
-      
-      document.getElementById('selectedTimeSlot').value = '';
-      submitBtn.disabled = true;
-      if(!selectedDate) { slotsSection.style.display = 'none'; return; }
-      gridContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 13px; color: var(--text-soft); padding: 15px;">Evaluating available grid slots layout...</div>';
-      slotsSection.style.display = 'block';
-      google.script.run.withSuccessHandler(renderSlotsGridElementsList).getAvailableSlots(selectedDate);
-    }
-    function renderSlotsGridElementsList(slotsArray) {
-      const gridContainer = document.getElementById('slots-grid-container');
-      gridContainer.innerHTML = '';
-      if(!slotsArray || slotsArray.length === 0) {
-        gridContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 13px; color: var(--danger); font-weight: 500; padding: 15px;">System Locked. No slots operational for selected coordinates.</div>';
-        return;
-      }
-      slotsArray.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'slot-card';
-        
-        if(s.isFull) {
-          card.classList.add('full');
-          card.innerHTML = `<div class="slot-time">${s.time}</div><div class="slot-status">Completely Filled</div>`;
-        } else {
-          const avail = s.capacity - s.bookedCount;
-          card.innerHTML = `<div class="slot-time">${s.time}</div><div class="slot-status">${avail} slots left</div>`;
-          card.onclick = () => selectTimeSlotCardElement(card, s.time);
-        }
-        gridContainer.appendChild(card);
-      });
-    }
-    function selectTimeSlotCardElement(cardNode, timeValueString) {
-      document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('selected'));
-      cardNode.classList.add('selected');
-      document.getElementById('selectedTimeSlot').value = timeValueString;
-      document.getElementById('submitBtn').disabled = false;
-    }
-    function handleFormSubmissionEvent(e) {
-      e.preventDefault();
-      
-      const fName = document.getElementById('firstName').value.trim();
-      const mName = document.getElementById('middleName').value.trim();
-      const lName = document.getElementById('lastName').value.trim();
-      
-      if(!fName || !lName) {
-        showAppAlert("Required Fields Missing", "First name and Last name fields are mandatory parameters.");
-        return;
-      }
-      
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Synchronizing Logs...';
-      const customResponses = {};
-      globalRegistrationFieldsLayout.forEach(f => {
-        const inputEl = document.getElementById(f.id);
-        customResponses[f.label] = inputEl.value;
-        
-        if (f.type === 'date' && (f.label.toLowerCase().includes('birth') || f.label.toLowerCase().includes('born'))) {
-          const ageVal = document.getElementById(`${f.id}_age`).value;
-          customResponses["Calculated Age Reference"] = ageVal;
-        }
-      });
-      const payload = {
-        firstName: fName,
-        middleName: mName,
-        lastName: lName,
-        email: document.getElementById('email').value,
-        date: document.getElementById('date').value,
-        time: document.getElementById('selectedTimeSlot').value,
-        customFields: customResponses
+      var dismissModal = function() {
+        modal.style.setProperty("display", "none", "important");
+        if (autoCloseTimeout) clearTimeout(autoCloseTimeout);
+        scanLock = false;
+        lastScannedCode = "";
       };
-      google.script.run.withSuccessHandler(res => {
-        submitBtn.innerText = 'Confirm Booking Matrix';
-        if(res.success) {
-          document.getElementById('appointmentForm').reset();
-          document.getElementById('slots-section').style.display = 'none';
-          document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('selected'));
-          document.querySelectorAll('.calculated-age-field').forEach(f => f.value = '');
-          
-          document.getElementById('receiptCodeDisplay').textContent = res.bookingCode;
-          
-          // FORCED TRIGGER: Override browser rendering delays
-          var modalElement = document.getElementById('statusModal');
-          modalElement.style.setProperty('display', 'flex', 'important');
-        } else {
-          showAppAlert("Submission Rejected", res.error);
-          submitBtn.disabled = false;
-        }
-      }).submitBookingForm(payload);
+      btn.onclick = dismissModal;
+      buttonsEl.appendChild(btn);
+      modal.style.setProperty("display", "flex", "important");
+      // Auto dismiss after 4 seconds
+      autoCloseTimeout = setTimeout(dismissModal, 4000);
     }
-    function closeStatusFeedbackModal() {
-      document.getElementById('statusModal').style.setProperty('display', 'none', 'important');
-    }
-    function toggleManagementModal(show) {
-      var mgmtModal = document.getElementById('managementModal');
-      mgmtModal.style.setProperty('display', show ? 'flex' : 'none', 'important');
-      if(!show) {
-        document.getElementById('manage-error').style.display = 'none';
-        document.getElementById('search-sub-panel').style.display = 'block';
-        document.getElementById('profile-display-panel').style.display = 'none';
-        document.getElementById('coordinate-shifting-panel').style.display = 'none';
-        document.getElementById('searchCode').value = '';
-        activeTargetTokenRecord = null;
-        
-        // Reset reschedule elements
-        document.getElementById('manage-new-date').value = '';
-        document.getElementById('selectedManageTimeSlot').value = '';
-        document.getElementById('manage-slots-section').style.display = 'none';
-        var mGrid = document.getElementById('manage-slots-grid-container');
-        if (mGrid) mGrid.innerHTML = '';
+    function showStatusCard(type, title, message) {
+      var card = document.getElementById("statusCard");
+      var icon = document.getElementById("statusCardIcon");
+      var titleEl = document.getElementById("statusCardTitle");
+      var msgEl = document.getElementById("statusCardMessage");
+      card.className = "status-card active";
+      titleEl.innerText = title;
+      msgEl.innerText = message;
+      if (type === "success") {
+        card.classList.add("status-card-success");
+        icon.innerHTML = '<i class="fas fa-check"></i>';
+      } else if (type === "warning") {
+        card.classList.add("status-card-warning");
+        icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+      } else if (type === "danger") {
+        card.classList.add("status-card-danger");
+        icon.innerHTML = '<i class="fas fa-times"></i>';
       }
     }
-    function executeTokenProfileLookup() {
-      const token = document.getElementById('searchCode').value.trim();
-      const errEl = document.getElementById('manage-error');
-      const findBtn = document.getElementById('findBtn');
-      
-      errEl.style.display = 'none';
-      if(!token) {
-        showAppAlert("Missing Token", "Booking alphanumeric reference code required.");
+    function processCheckIn(bookingCode) {
+      var webAppUrl = localStorage.getItem('bookingWebAppUrl') || "";
+      if (!webAppUrl) {
+        showStatusCard("danger", "Setup Required", "Please configure your Web App URL using the settings gear icon in the top right.");
+        scanLock = false;
+        lastScannedCode = "";
         return;
       }
-      findBtn.disabled = true; findBtn.innerText = 'Searching Archive...';
-      google.script.run.withSuccessHandler(record => {
-        findBtn.disabled = false; findBtn.innerText = 'Query Record Trace';
-        if(!record) {
-          errEl.textContent = "No appointment record matches that transaction sequence key.";
-          errEl.style.display = 'block';
-        } else {
-          activeTargetTokenRecord = record;
-          document.getElementById('search-sub-panel').style.display = 'none';
-          
-          document.getElementById('lbl-name').textContent = record.name;
-          document.getElementById('lbl-date').textContent = record.date;
-          document.getElementById('lbl-time').textContent = record.time;
-          document.getElementById('lbl-status').textContent = record.status || "Confirmed";
-          
-          var isAttended = record.attended === true || record.attended === "Yes";
-          document.getElementById('lbl-attended').innerHTML = isAttended ? '<span style="color:var(--success); font-weight:bold;">Yes</span>' : '<span style="color:var(--text-soft);">No</span>';
-          
-          const isCancelled = (record.status || "").toLowerCase() === 'cancelled';
-          if (isAttended) {
-            document.getElementById('cancelActionBtn').disabled = true;
-            document.getElementById('rescheduleActionBtn').disabled = true;
-            document.getElementById('cancelActionBtn').title = "Cannot cancel a checked-in booking";
-            document.getElementById('rescheduleActionBtn').title = "Cannot reschedule a checked-in booking";
-          } else {
-            document.getElementById('cancelActionBtn').disabled = isCancelled;
-            document.getElementById('rescheduleActionBtn').disabled = isCancelled;
-            document.getElementById('cancelActionBtn').removeAttribute('title');
-            document.getElementById('rescheduleActionBtn').removeAttribute('title');
-          }
-          document.getElementById('rescheduleActionBtn').innerText = 'Reschedule';
-          
-          document.getElementById('profile-display-panel').style.display = 'block';
-        }
-      }).retrieveBookingByToken(token);
-    }
-    function executeCancellationPipeline() {
-      if(!activeTargetTokenRecord) return;
-      
-      showAppConfirm(
-        "Cancel Booking", 
-        "Are you certain you want to cancel this booking registration schedule?", 
-        function() {
-          const cancelBtn = document.getElementById('cancelActionBtn');
-          cancelBtn.disabled = true; cancelBtn.innerText = 'Processing...';
-          google.script.run.withSuccessHandler(res => {
-            cancelBtn.innerText = 'Cancel Booking';
-            if(res.success) {
-              showAppAlert("Cancelled", "Appointment status set to cancelled successfully.", function() {
-                toggleManagementModal(false);
-                const currentPrimaryDate = document.getElementById('date').value;
-                if(currentPrimaryDate) handleTargetDaySlotsReload();
-              });
+      // Ensure URL ends correctly
+      var url = webAppUrl + "?action=checkIn&bookingCode=" + encodeURIComponent(bookingCode);
+      fetch(url)
+        .then(function(response) { return response.json(); })
+        .then(function(res) {
+          if (res.success) {
+            playSuccessBeep();
+            
+            if (res.alreadyCheckedIn) {
+              showScanResultPopup(
+                "warning", 
+                "Already Checked In", 
+                res.name + " (" + res.email + ") checked in previously for " + res.date + " @ " + res.time
+              );
             } else {
-              document.getElementById('manage-error').textContent = res.error;
-              document.getElementById('manage-error').style.display = 'block';
-              cancelBtn.disabled = false;
+              showScanResultPopup(
+                "success", 
+                "Booking Confirmed", 
+                res.name + " (" + res.email + ") checked in successfully for " + res.date + " @ " + res.time
+              );
             }
-          }).cancelBooking(activeTargetTokenRecord.bookingCode);
-        }
-      );
-    }
-    function handleManagementShiftDaysReload() {
-      const dateVal = document.getElementById('manage-new-date').value;
-      const gridContainer = document.getElementById('manage-slots-grid-container');
-      const sectionEl = document.getElementById('manage-slots-section');
-      
-      document.getElementById('selectedManageTimeSlot').value = '';
-      
-      if(!dateVal) { sectionEl.style.display = 'none'; return; }
-      gridContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 13px; color: var(--text-soft); padding: 15px;">Evaluating available grid slots layout...</div>';
-      sectionEl.style.display = 'block';
-      google.script.run.withSuccessHandler(renderManageSlotsGridElementsList).getAvailableSlots(dateVal);
-    }
-    function renderManageSlotsGridElementsList(slotsArray) {
-      const gridContainer = document.getElementById('manage-slots-grid-container');
-      gridContainer.innerHTML = '';
-      if(!slotsArray || slotsArray.length === 0) {
-        gridContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 13px; color: var(--danger); font-weight: 500; padding: 15px;">System Locked. No slots operational for selected coordinates.</div>';
-        return;
-      }
-      slotsArray.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'slot-card manage-slot-card';
-        
-        const isCurrentSlot = activeTargetTokenRecord && s.time === activeTargetTokenRecord.time && document.getElementById('manage-new-date').value === activeTargetTokenRecord.date;
-        
-        if(s.isFull && !isCurrentSlot) {
-          card.classList.add('full');
-          card.innerHTML = `<div class="slot-time">${s.time}</div><div class="slot-status">Completely Filled</div>`;
-        } else {
-          var statusText = "";
-          if (isCurrentSlot) {
-            statusText = "Your current slot";
           } else {
-            const avail = s.capacity - s.bookedCount;
-            statusText = `${avail} slots left`;
-          }
-          card.innerHTML = `<div class="slot-time">${s.time}</div><div class="slot-status">${statusText}</div>`;
-          card.onclick = () => selectManageTimeSlotCardElement(card, s.time);
-          
-          if (isCurrentSlot) {
-            selectManageTimeSlotCardElement(card, s.time);
-          }
-        }
-        gridContainer.appendChild(card);
-      });
-    }
-    function selectManageTimeSlotCardElement(cardNode, timeValueString) {
-      document.querySelectorAll('.manage-slot-card').forEach(c => c.classList.remove('selected'));
-      cardNode.classList.add('selected');
-      document.getElementById('selectedManageTimeSlot').value = timeValueString;
-    }
-    function executeReschedulingPipeline() {
-      if(!activeTargetTokenRecord) return;
-      
-      const reschedBtn = document.getElementById('rescheduleActionBtn');
-      const coordinatePanel = document.getElementById('coordinate-shifting-panel');
-      const errEl = document.getElementById('manage-error');
-      if(coordinatePanel.style.display === 'none') {
-        coordinatePanel.style.display = 'block';
-        reschedBtn.innerText = 'Confirm Shift';
-        return;
-      }
-      if(!newDateVal || !newTimeVal) {
-        showAppAlert("Incomplete Selection", "Both date and time coordinate specifications must be selected.");
-        return;
-      }
-      
-      reschedBtn.innerText = 'Shifting...'; reschedBtn.disabled = true;
-      google.script.run
-        .withSuccessHandler(res => {
-          reschedBtn.innerText = 'Reschedule'; reschedBtn.disabled = false;
-          if(res.success) {
-            showAppAlert("Rescheduled Successfully", "Appointment coordinate fields updated.", function() {
-              toggleManagementModal(false);
-              const activeDateSelection = document.getElementById('date').value;
-              if(activeDateSelection) {
-                google.script.run.withSuccessHandler(renderSlotsGridElementsList).getAvailableSlots(activeDateSelection);
-              }
-            });
-          } else {
-            errEl.textContent = res.error; errEl.style.display = 'block';
+            if (res.status === "Cancelled") {
+              showScanResultPopup(
+                "danger", 
+                "Booking Cancelled", 
+                "This booking for " + (res.name || "Unknown") + " (" + (res.email || "N/A") + ") has been cancelled."
+              );
+            } else if (res.status === "Invalid") {
+              showScanResultPopup(
+                "danger", 
+                "Invalid Booking", 
+                res.error || "The booking code is invalid."
+              );
+            } else {
+              showScanResultPopup(
+                "danger", 
+                "Check-In Failed", 
+                res.error || "Verification failed."
+              );
+            }
           }
         })
-        .withFailureHandler(() => {
-          reschedBtn.innerText = 'Reschedule'; reschedBtn.disabled = false;
-          errEl.textContent = "System pipeline timeout exception."; errEl.style.display = 'block';
-        })
-        .rescheduleBooking(activeTargetTokenRecord.bookingCode, newDateVal, newTimeVal);
+        .catch(function(err) {
+          var errorDetail = "Failed to connect to backend. This is usually caused by:\n" +
+            "• Incorrect URL: Check settings to ensure it ends in '/exec' (not '/dev' or '/edit').\n" +
+            "• Access control: Ensure the Web App is deployed with 'Who has access' set to 'Anyone'.\n" +
+            "• Deployment state: Make sure you deployed a 'New Version' of your code changes.";
+          showScanResultPopup("danger", "Check-In Error", errorDetail);
+        });
     }
   </script>
-  <!-- Reusable Custom Alert/Confirm Modal -->
-  <div id="appModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 10000; padding: 20px;">
-    <div class="modal-content" style="max-width: 400px; width: 100%; padding: 30px; border-radius: 16px; background: var(--surface); text-align: center; border: 1px solid var(--border); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-      <div id="appModalIcon" style="width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;"></div>
-      <h3 id="appModalTitle" style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text);"></h3>
-      <p id="appModalMessage" style="font-size: 14px; color: var(--text-soft); line-height: 1.5; margin-bottom: 24px;"></p>
-      <div id="appModalButtons" style="display: flex; gap: 12px; justify-content: center;"></div>
-    </div>
-  </div>
 </body>
 </html>
